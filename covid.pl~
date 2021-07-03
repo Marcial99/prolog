@@ -8,7 +8,7 @@ resource(calavera,image,image('calavera.jpg')).
 resource(enfermo,image,image('enfermo.jpg')).
 resource(leve,image,image('leve.jpg')).
 resource(negativo,image,image('negativo.jpg')).
-resource(medidasImg,image,image('medidas.jpeg')).
+resource(medidas,image,image('medidas.jpeg')).
 iniciar:-
     new(Inicio,dialog('Sistema experto Covid-19',size(700,700))),
     new(Titulo, text('Sistema experto para el diagnostico de Covid-19')),
@@ -51,15 +51,9 @@ de la Salud.')),
     send(Quees,font,bold),
     send(Info,append,Titulo2),
     send(Info,append,Quees),
-    new(Boton_medidas,button('CONOCER LAS MEDIDAS DE PREVENCIÓN',and(message(@prolog,medidas)))),
-    send(Info,append,Boton_medidas),
     nueva_imagen(Info,covid2,20,200),
     send(Info,open)
     .
-medidas:-
-    new(Medidas,dialog('Medidas de prevención')),
-    nueva_imagen(Medidas,medidasImg,0,0),
-    send(Medidas,open).
 
 diag:-
     new(Principal1, dialog('Sistema Experto Covid-19')),
