@@ -260,8 +260,10 @@ Los síntomas que usted presenta son graves y requieren de una atención medica in
 le recomendamos rotundamente acudir a su medico y seguir las medidas de prevención,
 dichas recomendaciones las puede encontrar en nuestro módulo de información.  ')),
      send(Salida,font,bold),send(Salida,alignment,center),
+
      ingresar_registro(Name,'Usted tiene covid-19',F),
-     new(Afect,text(F))
+      atom_concat('Registros guardados en la base de datos: ',F,R),
+     new(Afect,text(R))
 
       ;
     (   alto(Res_4,Res_5)->nueva_imagen(Respuesta,enfermo,20,40),new(Salida,text('
@@ -274,7 +276,8 @@ En caso de ser positivo, acuda de inmediato a su médico.
 ')),
         send(Salida,font,bold),send(Salida,alignment,center),
         ingresar_registro(Name,'Usted riesgo alto de padecer Covid',F),
-     new(Afect,text(F))
+         atom_concat('Registros guardados en la base de datos: ',F,R),
+     new(Afect,text(R))
         ;
     (  medio(Res_6,Res_7,Res_8,Res_9,Res_10,Res_11,Res_12,Res_13,Res_14)->nueva_imagen(Respuesta,leve,20,40),new(Salida,text('
 Estimado usuario, usted posee síntomas leves de COVID-19, es posible que usted sea portador
@@ -285,11 +288,13 @@ su médico siguiendo las medidas de prevención.
 ')),
        send(Salida,font,bold),send(Salida,alignment,center),
        ingresar_registro(Name,'Usted riesgo bajo de padecer Covid',F),
-     new(Afect,text(F))
+        atom_concat('Registros guardados en la base de datos: ',F,R),
+     new(Afect,text(R))
        ;
     nueva_imagen(Respuesta,negativo,20,40),
        ingresar_registro(Name,'Usted no tiene Covid',F),
-     new(Afect,text(F)),
+        atom_concat('Registros guardados en la base de datos: ',F,R),
+     new(Afect,text(R)),
     new(Salida,text('
 Estimado usuario, usted no posee ninguno de los síntomas, por lo tanto
 no es portador de esta enfermedad, sin embargo, recomendamos seguir las

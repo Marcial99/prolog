@@ -63,7 +63,7 @@ medidas:-
 
 diag:-
     new(Principal1, dialog('Sistema Experto Covid-19')),
-    new(Titulo, text('Sistema Experto para la detección de la enfermedad \n del Covid-19')),
+    new(Titulo, text('Sistema Experto para la detección de la enfermedad del Covid-19')),
     send(Titulo,font,bold),
     send(Titulo,alignment,center),
     send(Titulo,colour,"#ff2424"),
