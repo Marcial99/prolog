@@ -68,7 +68,8 @@ diag:-
     send(Titulo,alignment,center),
     send(Titulo,colour,"#ff2424"),
     send(Principal1,append,Titulo),
-
+    new(Nombre,text_item(nombre_del_paciente)),
+    send(Principal1,append,Nombre),
     %Creamos las etiquetas para cada pregunta
     new(Pregunta1,text('¿Presenta hipoxia(Oxigenación baja en la sangre) y no se atribuye al ambiente?')),
     send(Pregunta1,alignment,left),
@@ -221,12 +222,14 @@ send(Pregunta14,font,bold),
                                                         R_11?selection,
                                                         R_12?selection,
                                                         R_13?selection,
-                                                        R_14?selection)))),
+                                                        R_14?selection,
+                                                       Nombre?selection)))),
     send(Principal1, append, Boton_evaluar),
 
     send(Principal1,open).
 
-evaluar(R_1,R_2,R_3,R_4,R_5,R_6,R_7,R_8,R_9,R_10,R_11,R_12,R_13,R_14):-
+evaluar(R_1,R_2,R_3,R_4,R_5,R_6,R_7,R_8,R_9,R_10,R_11,R_12,R_13,R_14,Nombre):-
+    abrir_conexion,
     new(Respuesta, dialog('INFERENCIA')),
 
     new(Titulo2,text('Nuestro diagnostico es: ')),
@@ -235,6 +238,7 @@ evaluar(R_1,R_2,R_3,R_4,R_5,R_6,R_7,R_8,R_9,R_10,R_11,R_12,R_13,R_14):-
     send(Titulo2,colour,'#ff2424'),
 
     %Obtenemos el valor de cada respuesta
+    get(Nombre,value,Name),
     get(R_1,value,Res_1),
     get(R_2,value,Res_2),
     get(R_3,value,Res_3),
@@ -255,7 +259,12 @@ Estimado usuario, usted está contagiado de COVID-19.
 Los síntomas que usted presenta son graves y requieren de una atención medica inmediata,
 le recomendamos rotundamente acudir a su medico y seguir las medidas de prevención,
 dichas recomendaciones las puede encontrar en nuestro módulo de información.  ')),
-     send(Salida,font,bold),send(Salida,alignment,center)
+     send(Salida,font,bold),send(Salida,alignment,center),
+
+     ingresar_registro(Name,'Usted tiene covid-19',F),
+      atom_concat('Registros guardados en la base de datos: ',F,R),
+     new(Afect,text(R))
+
       ;
     (   alto(Res_4,Res_5)->nueva_imagen(Respuesta,enfermo,20,40),new(Salida,text('
 Estimado usuario, usted posee síntomas muy característicos de COVID-19,
@@ -265,7 +274,10 @@ encontrar en nuestro módulo de información y realizarse una prueba
 PCR o, en su defecto, de antígenos para verificar su resultado.
 En caso de ser positivo, acuda de inmediato a su médico.
 ')),
-        send(Salida,font,bold),send(Salida,alignment,center)
+        send(Salida,font,bold),send(Salida,alignment,center),
+        ingresar_registro(Name,'Usted riesgo alto de padecer Covid',F),
+         atom_concat('Registros guardados en la base de datos: ',F,R),
+     new(Afect,text(R))
         ;
     (  medio(Res_6,Res_7,Res_8,Res_9,Res_10,Res_11,Res_12,Res_13,Res_14)->nueva_imagen(Respuesta,leve,20,40),new(Salida,text('
 Estimado usuario, usted posee síntomas leves de COVID-19, es posible que usted sea portador
@@ -274,17 +286,25 @@ encuentran disponibles en nuestro módulo de información, así como realizarse una
 de antígenos para verificar los resultados, si el resultado es positivo, entonces acuda a
 su médico siguiendo las medidas de prevención.
 ')),
-       send(Salida,font,bold),send(Salida,alignment,center)
+       send(Salida,font,bold),send(Salida,alignment,center),
+       ingresar_registro(Name,'Usted riesgo bajo de padecer Covid',F),
+        atom_concat('Registros guardados en la base de datos: ',F,R),
+     new(Afect,text(R))
        ;
     nueva_imagen(Respuesta,negativo,20,40),
+       ingresar_registro(Name,'Usted no tiene Covid',F),
+        atom_concat('Registros guardados en la base de datos: ',F,R),
+     new(Afect,text(R)),
     new(Salida,text('
 Estimado usuario, usted no posee ninguno de los síntomas, por lo tanto
 no es portador de esta enfermedad, sin embargo, recomendamos seguir las
 medidas preventivas para prevenir la propagación y evitar contagios.')),send(Salida,font,bold),send(Salida,alignment,center)))),
     send(Respuesta,append,Titulo2),
     send(Respuesta,append,Salida),
+    send(Respuesta,append,Afect),
     new(Boton_info,button('Informacion',and(message(@prolog,informacion)))),
     send(Respuesta,append,Boton_info),
+    cerrar_conexion,
     send(Respuesta,open).
 
 
@@ -310,3 +330,29 @@ medio(Res_6,Res_7,Res_8,Res_9,Res_10,Res_11,Res_12,Res_13,Res_14):-
     Res_14 == 'SI'
     )
     .
+
+abrir_conexion:-
+    odbc_connect('MSProlog',_,
+                 [user(root),
+                  password(''),
+                  alias(prolog),
+                  open(once)]).
+
+cerrar_conexion:-
+    odbc_disconnect('prolog').
+
+consultar_registro(F):-
+
+        odbc_query('prolog',
+               'SELECT * FROM persona',F).
+concatenar(A,B,C):-
+    atom_concat('INSERT INTO persona (nombre,diagnostico) VALUES ("',A,D),
+    atom_concat(D,'","',E),
+    atom_concat(E,B,F),
+    atom_concat(F,'")',C).
+ingresar_registro(Nombre,Diagnostico,F):-
+     concatenar(Nombre,Diagnostico,C),
+    odbc_query('prolog',
+              C,affected(F)).
+
+
